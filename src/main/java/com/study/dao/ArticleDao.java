@@ -55,7 +55,7 @@ public class ArticleDao {
             Connection conn = con.getConnection();
             StringBuffer query = new StringBuffer();
             query.append(
-                " SELECT kategorie, title, writer, views, regDate, editDate, contents, fileCheck");
+                " SELECT kategorie, title, writer, views, regDate, editDate, contents, fileCheck, password");
             query.append(" FROM article ");
             query.append(" WHERE  id = ? ");
             PreparedStatement state = conn.prepareStatement(query.toString());
@@ -72,6 +72,7 @@ public class ArticleDao {
                 vo.setEditDate(rs.getDate("editDate"));
                 vo.setContents(rs.getString("contents"));
                 vo.setFileCheck(rs.getBoolean("fileCheck"));
+                vo.setPassword(rs.getString("password"));
             }
             return vo;
         } catch (SQLException e) {
@@ -99,6 +100,40 @@ public class ArticleDao {
             state.setString(5, article.getPassword());
             state.setString(6, article.getContents());
             state.setBoolean(7, article.getFileCheck());
+            System.out.println(state);
+            int result = state.executeUpdate();
+            if (result == 1) {
+                state = conn.prepareStatement(" SELECT LAST_INSERT_ID()");
+                ResultSet resultSet = state.executeQuery();
+                resultSet.next();
+                id = resultSet.getLong(1);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return id;
+    }
+
+    public long putArticle(ArticleDTO article) {
+        long id = -1;
+        try {
+            Connector con = Connector.getInstance();
+            Connection conn = con.getConnection();
+            StringBuffer query = new StringBuffer();
+            query.append(" UPDATE article SET");
+            query.append(" title = ?,");
+            query.append(" writer = ?,");
+            query.append(" contents = ?");
+            query.append(" WHERE  id = ? ");
+            PreparedStatement state = conn.prepareStatement(query.toString());
+            System.out.println(query.toString());
+            state.setString(1, article.getTitle());
+            state.setString(2, article.getWriter());
+            state.setString(3, article.getContents());
+            state.setLong(4, article.getId());
             System.out.println(state);
             int result = state.executeUpdate();
             if (result == 1) {

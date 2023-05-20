@@ -1,5 +1,8 @@
 package com.study.controller;
 
+import static com.study.utile.CheckInput.checkRequest;
+import static com.study.utile.CheckInput.getFileName;
+
 import com.study.dao.ArticleDao;
 import com.study.dao.FileDao;
 import com.study.dto.ArticleDTO;
@@ -14,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.regex.Pattern;
 
 @WebServlet(name = "write", value = "/boards/free/write")
 @MultipartConfig(maxFileSize = 16177215)
@@ -83,59 +85,5 @@ public class Write extends HttpServlet {
         }
     }
 
-    private String getFileName(Part part) {
-        String contentDisposition = part.getHeader("content-disposition");
-        String[] elements = contentDisposition.split(";");
 
-        for (String element : elements) {
-            if (element.trim().startsWith("filename")) {
-                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
-            }
-        }
-
-        return null;
-    }
-
-    public boolean checkPassword(String password) {
-        String pattern = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$!%*#?&])[A-Za-z[0-9]$@$!%*#?&]{4,15}$";
-        return Pattern.matches(pattern, password);
-    }
-
-    public boolean checkRequest(HttpServletRequest request) {
-        String kategorie = request.getParameter("kategorie");
-        String writer = request.getParameter("writer");
-        String password = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirmPassword");
-        String title = request.getParameter("title");
-        String contents = request.getParameter("contents");
-        return checkRequest(kategorie, writer, password, confirmPassword, title, contents);
-    }
-
-    private boolean checkRequest(String kategorie, String writer, String password,
-        String confirmPassword, String title, String contents) {
-        if (kategorie == null) {
-            return false;
-        }
-        if (writer == null) {
-            return false;
-        } else if (writer.length() < 3 || writer.length() >= 5) {
-            return false;
-        }
-        if (password == null || password.compareTo(confirmPassword) != 0) {
-            return false;
-        } else if (!checkPassword(password)) {
-            return false;
-        }
-        if (title == null) {
-            return false;
-        } else if (title.length() < 4 || title.length() >= 100) {
-            return false;
-        }
-        if (contents == null) {
-            return false;
-        } else if (contents.length() < 4 || contents.length() >= 2000) {
-            return false;
-        }
-        return true;
-    }
 }

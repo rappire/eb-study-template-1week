@@ -5,7 +5,7 @@
     <title>수정</title>
 </head>
 <body>
-<form action="/boards/free/modify" method="post" enctype="multipart/form-data">
+<form action="" method="post" enctype="multipart/form-data">
     <table>
         <td>
         <td>카테고리: ${article.kategorie}</td>
@@ -44,7 +44,7 @@
         </tr>
     </table>
     <input type="submit" value="수정">
-    <input type="button" value="취소" onclick="location.href='/boards/free/list'">
+    <input type="button" value="취소" onclick="location.href='/boards/free/list/'">
 </form>
 </body>
 <style>
