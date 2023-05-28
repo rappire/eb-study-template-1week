@@ -1,153 +1,95 @@
 package com.study.dao;
 
-import com.study.connection.Connector;
+import com.study.utile.Connector;
 import com.study.dto.ArticleDTO;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 
+/**
+ * ArticleDao
+ * 글에 대해서 CRUD 를 실행하는 객체
+ */
 public class ArticleDao {
-
+    private SqlSessionFactory factory = Connector.getSqlSession();
+    private SqlSession sqlSession;
     private static ArticleDao instance = new ArticleDao();
 
+    /**
+     * getInstance.
+     * @return 생성한 객체 리턴
+     * 싱글톤 패턴으로 ArticleDao 생성후 리턴
+     */
     public static ArticleDao getInstance() {
         return instance;
     }
 
-    public List<ArticleDTO> getArticleList() {
-        List<ArticleDTO> returnList = new ArrayList<ArticleDTO>();
-        try {
-            Connector con = Connector.getInstance();
-            Connection conn = con.getConnection();
-            StringBuffer query = new StringBuffer();
-            query.append(
-                " SELECT id, kategorie, title, writer, views, regDate, editDate, fileCheck");
-            query.append(" FROM article ");
-            PreparedStatement state = conn.prepareStatement(query.toString());
-            ResultSet rs = state.executeQuery();
-            while (rs.next()) {
-                ArticleDTO vo = new ArticleDTO();
-                vo.setId(rs.getLong("id"));
-                vo.setKategorie(rs.getString("kategorie"));
-                vo.setTitle(rs.getString("title"));
-                vo.setWriter(rs.getString("writer"));
-                vo.setViews(rs.getInt("views"));
-                vo.setRegDate(rs.getDate("regDate"));
-                vo.setEditDate(rs.getDate("editDate"));
-                vo.setFileCheck(rs.getBoolean("fileCheck"));
-                returnList.add(vo);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    /**
+     * getArticleList
+     * @param keyword 검색에 사용할 키워드
+     * @return 검색이 완료된 글을 반환
+     */
+    public List<ArticleDTO> getArticleList(String keyword){
+        sqlSession = factory.openSession();
+        List<ArticleDTO> returnList;
+        if (keyword == null) {
+            returnList = (ArrayList)sqlSession.selectList("selectArticleList");
+        } else{
+            returnList = (ArrayList)sqlSession.selectList("selectArticleListKeyword", keyword);
         }
+        sqlSession.close();
         return returnList;
     }
 
-    public ArticleDTO getArticle(Long id) {
-        ArticleDTO vo = null;
-        try {
-            Connector con = Connector.getInstance();
-            Connection conn = con.getConnection();
-            StringBuffer query = new StringBuffer();
-            query.append(
-                " SELECT kategorie, title, writer, views, regDate, editDate, contents, fileCheck, password");
-            query.append(" FROM article ");
-            query.append(" WHERE  id = ? ");
-            PreparedStatement state = conn.prepareStatement(query.toString());
-            state.setLong(1, id);
-            ResultSet rs = state.executeQuery();
-            if (rs.next()) {
-                vo = new ArticleDTO();
-                vo.setId(id);
-                vo.setKategorie(rs.getString("kategorie"));
-                vo.setTitle(rs.getString("title"));
-                vo.setWriter(rs.getString("writer"));
-                vo.setViews(rs.getInt("views"));
-                vo.setRegDate(rs.getDate("regDate"));
-                vo.setEditDate(rs.getDate("editDate"));
-                vo.setContents(rs.getString("contents"));
-                vo.setFileCheck(rs.getBoolean("fileCheck"));
-                vo.setPassword(rs.getString("password"));
-            }
-            return vo;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * getArticle
+     * @param id 가져올 글의 id
+     * @return 가져온 글 객체 반환
+     * 글을 가져와서 반환하고, 해당 글의 조회수를 1 늘림
+     */
+    public ArticleDTO getArticle(long id){
+        List<ArticleDTO> returnList;
+        sqlSession = factory.openSession();
+        returnList = (ArrayList)sqlSession.selectList("selectArticleList");
+        viewCount(id);
+        sqlSession.close();
+        return returnList.get(0);
     }
 
+    /**
+     * viewCount
+     * @param id 조회수를 증가시킬 글의 id
+     * 글의 조회수를 1 늘림
+     */
+    public void viewCount(long id){
+        sqlSession.update("viewCount", id);
+        sqlSession.commit();
+    }
+
+    /**
+     * postArticle
+     * @param article 작성할 글 객체
+     * @return 작성된 글의 id
+     * 글을 작성하여 id를 반환
+     */
     public long postArticle(ArticleDTO article) {
-        String resultState;
-        long id = -1;
-        try {
-            Connector con = Connector.getInstance();
-            Connection conn = con.getConnection();
-            StringBuffer query = new StringBuffer();
-            query.append(" INSERT INTO article");
-            query.append(" (kategorie, title, writer, views, password, contents, fileCheck)");
-            query.append(" VALUE(?, ?, ?, ?, ?, ?, ?)");
-            PreparedStatement state = conn.prepareStatement(query.toString());
-            state.setString(1, article.getKategorie());
-            state.setString(2, article.getTitle());
-            state.setString(3, article.getWriter());
-            state.setInt(4, 0);
-            state.setString(5, article.getPassword());
-            state.setString(6, article.getContents());
-            state.setBoolean(7, article.getFileCheck());
-            System.out.println(state);
-            int result = state.executeUpdate();
-            if (result == 1) {
-                state = conn.prepareStatement(" SELECT LAST_INSERT_ID()");
-                ResultSet resultSet = state.executeQuery();
-                resultSet.next();
-                id = resultSet.getLong(1);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        sqlSession = factory.openSession();
+        long id = sqlSession.update("insertArticle", article);
+        sqlSession.commit();
+        sqlSession.close();
         return id;
     }
 
-    public long putArticle(ArticleDTO article) {
-        long id = -1;
-        try {
-            Connector con = Connector.getInstance();
-            Connection conn = con.getConnection();
-            StringBuffer query = new StringBuffer();
-            query.append(" UPDATE article SET");
-            query.append(" title = ?,");
-            query.append(" writer = ?,");
-            query.append(" contents = ?");
-            query.append(" WHERE  id = ? ");
-            PreparedStatement state = conn.prepareStatement(query.toString());
-            System.out.println(query.toString());
-            state.setString(1, article.getTitle());
-            state.setString(2, article.getWriter());
-            state.setString(3, article.getContents());
-            state.setLong(4, article.getId());
-            System.out.println(state);
-            int result = state.executeUpdate();
-            if (result == 1) {
-                state = conn.prepareStatement(" SELECT LAST_INSERT_ID()");
-                ResultSet resultSet = state.executeQuery();
-                resultSet.next();
-                id = resultSet.getLong(1);
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return id;
+    /**
+     * deleteArticle
+     * @param id 삭제할 글의 id
+     * 글을 삭제
+     */
+    public void deleteArticle(long id) {
+        sqlSession = factory.openSession();
+        sqlSession.delete("deleteArticle", id);
+        sqlSession.commit();
+        sqlSession.close();
     }
 }

@@ -4,16 +4,36 @@ import java.util.Date;
 
 public class ArticleDTO {
 
+    /**
+     * id           : 글 ID
+     * category_id  : 카테고리 테이블에서 카테고리를 불러오기 위한 ID
+     * title        : 글 제목
+     * writer       : 글 작성자
+     * views        : 조회수
+     * reg_date     : 글 등록날짜
+     * edit_date    : 글 수정날짜
+     * password     : 비밀번호
+     * contents     : 글 내용
+     *
+     */
     private Long id;
-    private String kategorie;
+    private Long category_id;
+    private String category;
     private String title;
     private String writer;
     private int views;
-    private Date regDate;
-    private Date editDate;
+    private Date reg_date;
+    private Date edit_date;
     private String password;
     private String contents;
-    private Boolean fileCheck;
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
     public Long getId() {
         return id;
@@ -23,12 +43,12 @@ public class ArticleDTO {
         this.id = id;
     }
 
-    public String getKategorie() {
-        return kategorie;
+    public Long getCategory_id() {
+        return category_id;
     }
 
-    public void setKategorie(String kategorie) {
-        this.kategorie = kategorie;
+    public void setCategory_id(Long category_id) {
+        this.category_id = category_id;
     }
 
     public String getTitle() {
@@ -56,19 +76,19 @@ public class ArticleDTO {
     }
 
     public Date getRegDate() {
-        return regDate;
+        return reg_date;
     }
 
     public void setRegDate(Date regDate) {
-        this.regDate = regDate;
+        this.reg_date = regDate;
     }
 
     public Date getEditDate() {
-        return editDate;
+        return edit_date;
     }
 
     public void setEditDate(Date editDate) {
-        this.editDate = editDate;
+        this.edit_date = editDate;
     }
 
     public String getPassword() {
@@ -85,13 +105,5 @@ public class ArticleDTO {
 
     public void setContents(String contents) {
         this.contents = contents;
-    }
-
-    public Boolean getFileCheck() {
-        return fileCheck;
-    }
-
-    public void setFileCheck(Boolean fileCheck) {
-        this.fileCheck = fileCheck;
     }
 }

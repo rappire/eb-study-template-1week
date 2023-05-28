@@ -36,7 +36,7 @@
                     <c:choose>
                         <c:when test="${article.fileCheck}">
                             <tr text-align="center">
-                                <td>${article.kategorie }</td>
+                                <td>${article.category }</td>
                                 <td>
                                     <p>O</p>
                                 </td>
@@ -51,7 +51,7 @@
                         </c:when>
                         <c:otherwise>
                             <tr text-align="center">
-                                <td>${article.kategorie }</td>
+                                <td>${article.category }</td>
                                 <td>
                                     <p></p>
                                 </td>
@@ -123,7 +123,11 @@
             <%--        </tfoot>--%>
         </table>
     </main>
-    <footer style="display: flex;">
+    <footer style="display: flex; flex-direction: column">
+        <form action="" method="get">
+            <input type="text" name="keyword" placeholder="검색어를 입력해주세요"><br>
+            <input type="submit" value="검색">
+        </form>
         <form action="/boards/free/write" method="get">
             <input type="submit" value="등록">
         </form>

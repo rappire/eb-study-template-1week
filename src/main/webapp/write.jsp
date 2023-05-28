@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <html>
 <head>
     <title>등록</title>
@@ -6,10 +8,10 @@
 <body>
 <form action="" method="post" enctype="multipart/form-data">
     <label>카테고리:</label>
-    <select name="kategorie">
-        <option value="JAVA">JAVA</option>
-        <option value="JavaScript">JavaScript</option>
-        <option value="Database">Database</option>
+    <select name="category">
+        <c:forEach items="${categoryList}" var="category">
+            <option value="${category.id}"> ${category.category}</option>
+        </c:forEach>
     </select>
     <br>
     <label for="writer">작성자:</label>
@@ -31,6 +33,11 @@
     <input type="submit" value="저장">
     <input type="button" value="취소" onclick="location.href='/boards/free/list'">
 </form>
+<c:if test="${not empty message}">
+    <script>
+      alert('${message}');
+    </script>
+</c:if>
 </body>
 <style>
     body {

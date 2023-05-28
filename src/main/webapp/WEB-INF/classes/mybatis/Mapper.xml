@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.java.study.model.mapper.MemberMapper">
+    <!-- Article 관련 SQL    -->
+    <select id="selectArticleListKeyword" resultType="com.study.dto.ArticleDTO" parameterType="String">
+        SELECT * FROM article A LEFT JOIN category C ON A.category_id = C.id WHERE A.title = #{keyword}
+    </select>
+    <select id="selectArticleList" resultType="com.study.dto.ArticleDTO">
+        SELECT * FROM article A LEFT JOIN category C ON A.category_id = C.id
+    </select>
+    <select id="selectArticle"  parameterType="long" resultType="com.study.dto.ArticleDTO">
+        SELECT * FROM article A LEFT JOIN category C ON A.category_id = C.id WHERE A.id = #{id}
+    </select>
+    <update id="viewCount" parameterType="long">
+        UPDATE article SET views = views + 1 WHERE id = #{id}
+    </update>
+    <insert id="insertArticle" parameterType="com.study.dto.ArticleDTO">
+        INSERT INTO article(category_id, title, writer, views, password, contents)
+        VALUES(#{category_id},#{title},#{writer}, #{views}, #{password}, #{contents})
+    </insert>
+    <delete id="deleteArticle" parameterType="long">
+        DELETE Ar, Co
+        FROM article Ar INNER JOIN comment Co
+        WHERE Ar.id = #{id}
+        AND Co.id = #{id}
+    </delete>
+
+
+    <!-- Comment 관련 SQL    -->
+    <select id="selectCommentList"  parameterType="long" resultType="com.study.dto.CommentDTO">
+        SELECT * FROM comment WHERE article_id = #{id}
+    </select>
+    <insert id="insertComment" parameterType="com.study.dto.CommentDTO">
+        INSERT INTO article(article_id, contents)
+        VALUES(#{article_id},#{contents})
+    </insert>
+    <!-- Category 관련 SQL   -->
+    <select id="selectCategoryList" resultType="com.study.dto.CategoryDTO">
+        SELECT id, category FROM category
+    </select>
+</mapper>
